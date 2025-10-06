@@ -1,82 +1,75 @@
+"""REPL (Read-Eval-Print Loop) for the command-line calculator."""
+
 from app.operation.operations import add, subtract, multiply, divide
-from app.calculation.calculation import Calculation
+from app.calculation.calculation import CalculationFactory
 
 
 def repl():
-    """Run the Read-Eval-Print Loop for the calculator."""
-    history = []
+    """Run the calculator REPL interface."""
     print("Calculator REPL. Type 'help' for commands.")
+
+    history = []
+    operations = {
+        "add": add,
+        "subtract": subtract,
+        "multiply": multiply,
+        "divide": divide,
+    }
 
     while True:
         try:
-            raw = input("calc> ").strip()
-        except (EOFError, KeyboardInterrupt):
+            user_input = input(">>> ").strip().lower()
+        except (EOFError, KeyboardInterrupt):  # pragma: no cover
             print("\nGoodbye!")
-            raise SystemExit
+            break
 
-        if not raw:
-            continue
-
-        # Exit command
-        if raw.lower() == "exit":
+        if user_input == "exit":
             print("Goodbye!")
             raise SystemExit
 
-        # Help command
-        if raw.lower() == "help":
+        elif user_input == "help":
             print(
-                "Available commands:\n"
-                "  help     - Show this help message\n"
-                "  history  - Show calculation history\n"
-                "  exit     - Exit the calculator\n"
-                "Usage:\n"
-                "  <operation> <num1> <num2>\n"
-                "Operations: add, subtract, multiply, divide"
+                "Commands:\n"
+                "  add, subtract, multiply, divide <num1> <num2>\n"
+                "  history   - Show calculation history\n"
+                "  help      - Show this help message\n"
+                "  exit      - Exit the calculator"
             )
-            continue
 
-        # History command
-        if raw.lower() == "history":
+        elif user_input == "history":
             if not history:
                 print("No calculations yet.")
             else:
-                print("History:")
-                for item in history:
-                    print(f"  {item}")
-            continue
+                print("Calculation History:")
+                for h in history:
+                    print(h)
 
-        # Handle operations
-        parts = raw.split()
-        if len(parts) == 3:
-            op, a_str, b_str = parts
-            try:
-                a, b = float(a_str), float(b_str)
-            except ValueError:
-                print("Invalid numbers. Usage: <operation> <num1> <num2>")
+        elif user_input:
+            parts = user_input.split()
+            if len(parts) != 3:
+                print("Invalid command. Try again or type 'help'.")
                 continue
 
-            operation_map = {
-                "add": add,
-                "subtract": subtract,
-                "multiply": multiply,
-                "divide": divide,
-            }
+            operation, num1, num2 = parts
+            if operation not in operations:
+                print("Invalid operation. Type 'help' for a list of commands.")
+                continue
 
-            func = operation_map.get(op.lower())
-            if func:
+            try:
+                a, b = float(num1), float(num2)
+            except ValueError:
+                print("Invalid numbers. Please enter numeric values.")
+                continue
+
+            try:
+                func = operations[operation]
                 result = func(a, b)
-                history.append(Calculation(a, b, func))
                 print(f"Result: {result}")
-            else:
-                print("Invalid command. Try again or type 'help'.")
-        else:
-            print("Invalid command. Try again or type 'help'.")
+                history.append(f"{operation}({a}, {b}) = {result}")
+            except ZeroDivisionError:
+                print("Error: Division by zero")
+            except Exception as e:  # pragma: no cover (safety net)
+                print(f"Error: {e}")
 
-
-def main():
-    """Entry point for running REPL."""
-    repl()
-
-
-if __name__ == "__main__":
-    main()
+        else:  # pragma: no cover
+            print("Invalid input. Type 'help' for commands.")
