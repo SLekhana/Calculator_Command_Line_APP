@@ -16,12 +16,16 @@ class Calculation:
         return self.operation(self.a, self.b)
 
     def execute(self):
-        """Alias for perform(), for compatibility with tests."""
+        """Alias for perform() — used in tests."""
         return self.perform()
 
     def __repr__(self):
-        """Readable representation (helps with test coverage)."""
-        return f"Calculation({self.a}, {self.b}, {self.operation.__name__})"
+        """Readable representation for debugging."""
+        try:
+            name = self.operation.__name__
+        except AttributeError:
+            name = str(self.operation)
+        return f"Calculation({self.a}, {self.b}, {name})"
 
 
 class CalculationFactory:
@@ -29,13 +33,7 @@ class CalculationFactory:
 
     @staticmethod
     def create(a: float, b: float, operation):
-        """
-        Return a Calculation object for given operands and operation.
-
-        Accepts operation as either:
-        - a callable (e.g., operations.add), or
-        - a string ('add', 'subtract', 'multiply', 'divide').
-        """
+        """Return a Calculation object for given operands and operation."""
         op_map = {
             "add": operations.add,
             "subtract": operations.subtract,
@@ -43,11 +41,9 @@ class CalculationFactory:
             "divide": operations.divide,
         }
 
-        # Convert string operation to function if needed
+        # Accept both string and callable operation
         if isinstance(operation, str):
-            if operation not in op_map:
-                raise ValueError("Invalid operation name")
-            operation = op_map[operation]
+            operation = op_map.get(operation)
 
         if not callable(operation):
             raise ValueError("Invalid operation name")
