@@ -19,9 +19,9 @@ def repl():
     while True:
         try:
             user_input = input(">>> ").strip().lower()
-        except (EOFError, KeyboardInterrupt):  # pragma: no cover
+        except (EOFError, KeyboardInterrupt):
             print("\nGoodbye!")
-            break
+            raise SystemExit
 
         if user_input == "exit":
             print("Goodbye!")
@@ -29,7 +29,7 @@ def repl():
 
         elif user_input == "help":
             print(
-                "Commands:\n"
+                "Available commands:\n"
                 "  add, subtract, multiply, divide <num1> <num2>\n"
                 "  history   - Show calculation history\n"
                 "  help      - Show this help message\n"
@@ -52,7 +52,7 @@ def repl():
 
             operation, num1, num2 = parts
             if operation not in operations:
-                print("Invalid operation. Type 'help' for a list of commands.")
+                print("Invalid command. Type 'help' for a list of commands.")
                 continue
 
             try:
@@ -63,13 +63,15 @@ def repl():
 
             try:
                 func = operations[operation]
-                result = func(a, b)
+                # Using CalculationFactory pattern
+                calc = CalculationFactory.create(a, b, func)
+                # EAFP pattern
+                if hasattr(calc, "perform"):
+                    result = calc.perform()
+                elif callable(calc):
+                    result = calc()
+                else:
+                    raise TypeError("Invalid calculation object")
+
                 print(f"Result: {result}")
                 history.append(f"{operation}({a}, {b}) = {result}")
-            except ZeroDivisionError:
-                print("Error: Division by zero")
-            except Exception as e:  # pragma: no cover (safety net)
-                print(f"Error: {e}")
-
-        else:  # pragma: no cover
-            print("Invalid input. Type 'help' for commands.")
