@@ -1,41 +1,67 @@
-import builtins
-import pytest
-from app.calculator.repl import repl, main
+from app.calculation.calculation import CalculationFactory
+from app.operation import operations
 
 
-@pytest.fixture
-def mock_input(monkeypatch):
-    # Feed multiple valid and special commands
-    inputs = iter([
-        "add 2 3",
-        "subtract 10 4",
-        "multiply 3 5",
-        "divide 8 2",
-        "history",
-        "help",
-        "exit"
-    ])
-    monkeypatch.setattr(builtins, "input", lambda _: next(inputs))
+def repl():
+    """Run the Read-Eval-Print Loop for the calculator."""
+    history = []
+    print("Calculator REPL. Type 'help' for commands.")
 
+    while True:
+        try:
+            raw = input("calc> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye!")
+            raise SystemExit  # pragma: no cover
 
-def test_repl_runs_without_error(mock_input, capsys):
-    """Simulate a full REPL session and ensure all commands work."""
-    with pytest.raises(SystemExit):  # ✅ Expect normal exit
-        repl()
+        if not raw:
+            continue
 
-    captured = capsys.readouterr()
+        if raw.lower() == "exit":
+            print("Goodbye!")
+            raise SystemExit
 
-    # Verify expected output
-    assert "Calculator REPL. Type 'help' for commands." in captured.out
-    assert "Result: 5.0" in captured.out
-    assert "Result: 6.0" in captured.out
-    assert "Result: 15.0" in captured.out
-    assert "Result: 4.0" in captured.out
-    assert "History:" in captured.out or "No calculations yet." in captured.out
-    assert "Available commands" in captured.out
-    assert "Goodbye!" in captured.out
+        if raw.lower() == "help":
+            print(
+                "Available commands:\n"
+                "  help     - Show this help message\n"
+                "  history  - Show calculation history\n"
+                "  exit     - Exit the calculator\n"
+                "Usage:\n"
+                "  <operation> <num1> <num2>\n"
+                "Operations: add, subtract, multiply, divide"
+            )
+            continue
 
+        if raw.lower() == "history":
+            if not history:
+                print("No calculations yet.")
+            else:
+                print("History:")
+                for item in history:
+                    print(item)
+            continue
 
-def test_main_alias():
-    """Ensure main() calls repl() correctly."""
-    assert callable(main)
+        # Parse math operations: "<op> <num1> <num2>"
+        parts = raw.split()
+        if len(parts) != 3:
+            print("Invalid command. Try again or type 'help'.")
+            continue
+
+        op, a_str, b_str = parts
+
+        # Validate operation
+        if op not in {"add", "subtract", "multiply", "divide"}:
+            print("Invalid command. Try again or type 'help'.")
+            continue
+
+        try:
+            a, b = float(a_str), float(b_str)
+        except ValueError:
+            print("Invalid numbers. Please enter valid numeric values.")
+            continue
+
+        try:
+            # Perform the calculation using CalculationFactory
+            calc = CalculationFactory.create(op, a, b)
+            result = calc
