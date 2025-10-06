@@ -1,32 +1,26 @@
-from app.operation import operations
+"""Handles creation and execution of calculations."""
 
+from dataclasses import dataclass
+
+
+@dataclass
 class Calculation:
-    """Represents a single calculation."""
+    """Represents a single arithmetic calculation."""
+    a: float
+    b: float
+    operation: callable
 
-    def __init__(self, a, b, operation):
-        self.a = a
-        self.b = b
-        self.operation = operation
-
-    def execute(self):
-        """Execute the stored operation."""
+    def perform(self):
+        """Perform the stored calculation and return the result."""
         return self.operation(self.a, self.b)
 
 
 class CalculationFactory:
-    """Factory to create Calculation objects."""
+    """Factory class to create Calculation objects."""
 
     @staticmethod
-    def create(a, b, operation_name):
-        operations_map = {
-            "add": operations.add,
-            "subtract": operations.subtract,
-            "multiply": operations.multiply,
-            "divide": operations.divide,
-        }
-
-        if operation_name not in operations_map:
+    def create(a: float, b: float, operation):
+        """Return a Calculation object for given operands and operation."""
+        if not callable(operation):
             raise ValueError("Invalid operation name")
-
-        return Calculation(a, b, operations_map[operation_name])
-
+        return Calculation(a, b, operation)
