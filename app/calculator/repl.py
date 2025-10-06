@@ -1,6 +1,6 @@
 """REPL (Read-Eval-Print Loop) for the command-line calculator."""
 
-from app.operation.operations import add, subtract, multiply, divide
+from app.operation import operations
 from app.calculation.calculation import CalculationFactory
 
 
@@ -9,11 +9,11 @@ def repl():
     print("Calculator REPL. Type 'help' for commands.")
 
     history = []
-    operations = {
-        "add": add,
-        "subtract": subtract,
-        "multiply": multiply,
-        "divide": divide,
+    valid_ops = {
+        "add": operations.add,
+        "subtract": operations.subtract,
+        "multiply": operations.multiply,
+        "divide": operations.divide,
     }
 
     while True:
@@ -35,54 +35,55 @@ def repl():
                 "  help      - Show this help message\n"
                 "  exit      - Exit the calculator"
             )
+            continue
 
         elif user_input == "history":
             if not history:
                 print("No calculations yet.")
             else:
                 print("Calculation History:")
-                for h in history:
-                    print(h)
+                for item in history:
+                    print(item)
+            continue
 
-        elif user_input:
-            parts = user_input.split()
-            if len(parts) != 3:
-                print("Invalid command. Try again or type 'help'.")
-                continue
+        elif not user_input:
+            continue
 
-            operation, num1, num2 = parts
-            if operation not in operations:
-                print("Invalid command. Type 'help' for a list of commands.")
-                continue
+        # Parse input
+        parts = user_input.split()
+        if len(parts) != 3:
+            print("Invalid command. Try again or type 'help'.")
+            continue
 
-            try:
-                a, b = float(num1), float(num2)
-            except ValueError:
-                print("Invalid numbers. Please enter numeric values.")
-                continue
+        operation, num1, num2 = parts
+        if operation not in valid_ops:
+            print("Invalid command. Type 'help' for a list of commands.")
+            continue
 
-            try:
-                func = operations[operation]
-                # Use CalculationFactory to create calculation object
-                calc = CalculationFactory.create(a, b, func)
+        try:
+            a, b = float(num1), float(num2)
+        except ValueError:
+            print("Invalid numbers. Please enter numeric values.")
+            continue
 
-                # Execute safely (supporting multiple object types)
-                if hasattr(calc, "perform"):
-                    result = calc.perform()
-                elif callable(calc):
-                    result = calc()
-                else:
-                    raise TypeError("Invalid calculation object")
+        try:
+            # Create calculation via factory (string-based)
+            calc = CalculationFactory.create(a, b, operation)
 
-                print(f"Result: {result}")
-                history.append(f"{operation}({a}, {b}) = {result}")
+            # Execute the calculation
+            if hasattr(calc, "perform"):
+                result = calc.perform()
+            elif callable(calc):
+                result = calc()
+            else:
+                raise TypeError("Invalid calculation object")
 
-            except ZeroDivisionError:
-                print("Error: Division by zero")
-            except TypeError as e:
-                print(f"Error: {e}")
-            except Exception as e:  # pragma: no cover
-                print(f"Error: {e}")
+            print(f"Result: {result}")
+            history.append(f"{operation}({a}, {b}) = {result}")
 
-        else:  # pragma: no cover
-            print("Invalid input. Type 'help' for commands.")
+        except ZeroDivisionError:
+            print("Error: Division by zero")
+        except TypeError as e:
+            print(f"Error: {e}")
+        except Exception as e:
+            print(f"Error: {e}")
