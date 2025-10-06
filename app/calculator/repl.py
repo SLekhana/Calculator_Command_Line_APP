@@ -67,10 +67,11 @@ def repl():
             continue
 
         try:
-            # Create calculation via factory (string-based)
-            calc = CalculationFactory.create(a, b, operation)
+            # Use CalculationFactory correctly
+            func = valid_ops[operation]
+            calc = CalculationFactory.create(a, b, func)
 
-            # Execute the calculation
+            # Execute the calculation (perform() or callable)
             if hasattr(calc, "perform"):
                 result = calc.perform()
             elif callable(calc):
