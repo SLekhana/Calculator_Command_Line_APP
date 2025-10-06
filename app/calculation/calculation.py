@@ -13,19 +13,19 @@ class Calculation:
 
     def perform(self):
         """Perform the stored calculation and return the result."""
-        return self.operation(self.a, self.b)
+        try:
+            return self.operation(self.a, self.b)
+        except ZeroDivisionError:
+            raise ZeroDivisionError("Cannot divide by zero")
 
     def execute(self):
-        """Alias for perform() — used in tests."""
+        """Alias for perform() for backward compatibility."""
         return self.perform()
 
     def __repr__(self):
         """Readable representation for debugging."""
-        try:
-            name = self.operation.__name__
-        except AttributeError:
-            name = str(self.operation)
-        return f"Calculation({self.a}, {self.b}, {name})"
+        op_name = getattr(self.operation, "__name__", str(self.operation))
+        return f"Calculation({self.a}, {self.b}, {op_name})"
 
 
 class CalculationFactory:
@@ -41,7 +41,7 @@ class CalculationFactory:
             "divide": operations.divide,
         }
 
-        # Accept both string and callable operation
+        # Handle string operation names
         if isinstance(operation, str):
             operation = op_map.get(operation)
 
