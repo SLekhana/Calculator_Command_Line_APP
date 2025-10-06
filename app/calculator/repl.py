@@ -1,69 +1,68 @@
-from app.operation import operations
+"""Command-line REPL for the Calculator application."""
+
 from app.calculation.calculation import CalculationFactory
 
+
 def repl():
-    print("Calculator REPL. Type 'help' for commands.")
+    """Run the calculator REPL loop."""
     history = []
-    valid_ops = {
-        "add": operations.add,
-        "subtract": operations.subtract,
-        "multiply": operations.multiply,
-        "divide": operations.divide,
-    }
+    print("Calculator REPL. Type 'help' for commands.")
 
     while True:
         try:
-            user_input = input(">>> ").strip().lower()
-        except (EOFError, KeyboardInterrupt):
+            user_input = input(">>> ").strip()
+            if not user_input:
+                continue
+
+            parts = user_input.split()
+            command = parts[0].lower()
+
+            if command == "exit":
+                print("Goodbye!")
+                raise SystemExit
+
+            elif command == "help":
+                print("Available commands:")
+                print("  add a b        - Add two numbers")
+                print("  subtract a b   - Subtract two numbers")
+                print("  multiply a b   - Multiply two numbers")
+                print("  divide a b     - Divide two numbers")
+                print("  history        - Show calculation history")
+                print("  help           - Show this help message")
+                print("  exit           - Exit the calculator")
+
+            elif command == "history":
+                if not history:
+                    print("No calculations yet.")
+                else:
+                    print("Calculation History:")
+                    for item in history:
+                        print(f"  {item}")
+
+            elif command in {"add", "subtract", "multiply", "divide"}:
+                if len(parts) != 3:
+                    print("Error: Invalid input format. Usage: <operation> a b")
+                    continue
+
+                try:
+                    a, b = float(parts[1]), float(parts[2])
+                except ValueError:
+                    print("Error: Invalid numbers")
+                    continue
+
+                try:
+                    calc = CalculationFactory.create(a, b, command)
+                    result = calc.execute()
+                    print(f"Result: {result}")
+                    history.append(f"{command}({a}, {b}) = {result}")
+                except ZeroDivisionError:
+                    print("Error: Division by zero")
+                except ValueError as e:
+                    print(f"Error: {e}")
+
+            else:
+                print("Error: Invalid input format. Type 'help' for commands.")
+
+        except (KeyboardInterrupt, EOFError):
             print("\nGoodbye!")
             raise SystemExit
-
-        if user_input == "exit":
-            print("Goodbye!")
-            raise SystemExit
-        elif user_input == "help":
-            print(
-                "Available commands:\n"
-                "  add, subtract, multiply, divide <num1> <num2>\n"
-                "  history   - Show calculation history\n"
-                "  help      - Show this help message\n"
-                "  exit      - Exit the calculator"
-            )
-            continue
-        elif user_input == "history":
-            if not history:
-                print("No calculations yet.")
-            else:
-                print("Calculation History:")
-                for item in history:
-                    print(item)
-            continue
-        elif not user_input:
-            continue
-
-        parts = user_input.split()
-        if len(parts) != 3:
-            print("Invalid command. Try again or type 'help'.")
-            continue
-
-        operation, num1, num2 = parts
-        if operation not in valid_ops:
-            print("Invalid command. Type 'help' for a list of commands.")
-            continue
-
-        try:
-            a, b = float(num1), float(num2)
-        except ValueError:
-            print("Invalid numbers. Please enter numeric values.")
-            continue
-
-        func = valid_ops[operation]
-        try:
-            calc = CalculationFactory.create(a, b, func)
-            result = calc.perform()
-            print(f"Result: {result}")
-            history.append(f"{operation}({a}, {b}) = {result}")
-        except ZeroDivisionError:
-            print("Error: Division by zero")
-        except Exception as e:
-            print(f"Error: {e}")
