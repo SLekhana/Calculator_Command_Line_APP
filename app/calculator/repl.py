@@ -1,13 +1,8 @@
-"""REPL (Read-Eval-Print Loop) for the command-line calculator."""
-
 from app.operation import operations
 from app.calculation.calculation import CalculationFactory
 
-
 def repl():
-    """Run the calculator REPL interface."""
     print("Calculator REPL. Type 'help' for commands.")
-
     history = []
     valid_ops = {
         "add": operations.add,
@@ -26,7 +21,6 @@ def repl():
         if user_input == "exit":
             print("Goodbye!")
             raise SystemExit
-
         elif user_input == "help":
             print(
                 "Available commands:\n"
@@ -36,7 +30,6 @@ def repl():
                 "  exit      - Exit the calculator"
             )
             continue
-
         elif user_input == "history":
             if not history:
                 print("No calculations yet.")
@@ -45,11 +38,9 @@ def repl():
                 for item in history:
                     print(item)
             continue
-
         elif not user_input:
             continue
 
-        # Parse input
         parts = user_input.split()
         if len(parts) != 3:
             print("Invalid command. Try again or type 'help'.")
@@ -66,25 +57,13 @@ def repl():
             print("Invalid numbers. Please enter numeric values.")
             continue
 
+        func = valid_ops[operation]
         try:
-            # Use CalculationFactory correctly
-            func = valid_ops[operation]
             calc = CalculationFactory.create(a, b, func)
-
-            # Execute the calculation (perform() or callable)
-            if hasattr(calc, "perform"):
-                result = calc.perform()
-            elif callable(calc):
-                result = calc()
-            else:
-                raise TypeError("Invalid calculation object")
-
+            result = calc.perform()
             print(f"Result: {result}")
             history.append(f"{operation}({a}, {b}) = {result}")
-
         except ZeroDivisionError:
             print("Error: Division by zero")
-        except TypeError as e:
-            print(f"Error: {e}")
         except Exception as e:
             print(f"Error: {e}")
