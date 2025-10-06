@@ -1,67 +1,60 @@
-from app.calculation.calculation import CalculationFactory
-from app.operation import operations
+import pytest
+from app.calculator.repl import repl, main
 
 
-def repl():
-    """Run the Read-Eval-Print Loop for the calculator."""
-    history = []
-    print("Calculator REPL. Type 'help' for commands.")
+def test_help_command(monkeypatch, capsys):
+    """Simulate 'help' then 'exit'."""
+    inputs = iter(["help", "exit"])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
-    while True:
-        try:
-            raw = input("calc> ").strip()
-        except (EOFError, KeyboardInterrupt):
-            print("\nGoodbye!")
-            raise SystemExit  # pragma: no cover
+    # Expect SystemExit on 'exit'
+    with pytest.raises(SystemExit):
+        main()
 
-        if not raw:
-            continue
+    captured = capsys.readouterr()
+    assert "Available commands" in captured.out
+    assert "Operations: add, subtract, multiply, divide" in captured.out
+    assert "Goodbye!" in captured.out
 
-        if raw.lower() == "exit":
-            print("Goodbye!")
-            raise SystemExit
 
-        if raw.lower() == "help":
-            print(
-                "Available commands:\n"
-                "  help     - Show this help message\n"
-                "  history  - Show calculation history\n"
-                "  exit     - Exit the calculator\n"
-                "Usage:\n"
-                "  <operation> <num1> <num2>\n"
-                "Operations: add, subtract, multiply, divide"
-            )
-            continue
+def test_invalid_command(monkeypatch, capsys):
+    """Simulate invalid input and exit."""
+    inputs = iter(["xyz", "exit"])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
-        if raw.lower() == "history":
-            if not history:
-                print("No calculations yet.")
-            else:
-                print("History:")
-                for item in history:
-                    print(item)
-            continue
+    with pytest.raises(SystemExit):
+        main()
 
-        # Parse math operations: "<op> <num1> <num2>"
-        parts = raw.split()
-        if len(parts) != 3:
-            print("Invalid command. Try again or type 'help'.")
-            continue
+    captured = capsys.readouterr()
+    assert "Invalid command" in captured.out
+    assert "Goodbye!" in captured.out
 
-        op, a_str, b_str = parts
 
-        # Validate operation
-        if op not in {"add", "subtract", "multiply", "divide"}:
-            print("Invalid command. Try again or type 'help'.")
-            continue
+def test_repl_runs_without_error(monkeypatch, capsys):
+    """Simulate full REPL session with valid operations."""
+    inputs = iter([
+        "add 2 3",
+        "subtract 10 4",
+        "multiply 2 5",
+        "divide 10 2",
+        "history",
+        "help",
+        "exit"
+    ])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
 
-        try:
-            a, b = float(a_str), float(b_str)
-        except ValueError:
-            print("Invalid numbers. Please enter valid numeric values.")
-            continue
+    # Expect clean exit from REPL
+    with pytest.raises(SystemExit):
+        repl()
 
-        try:
-            # Perform the calculation using CalculationFactory
-            calc = CalculationFactory.create(op, a, b)
-            result = calc
+    captured = capsys.readouterr()
+
+    # Validate all expected outputs
+    assert "Calculator REPL. Type 'help' for commands." in captured.out
+    assert "Result: 5.0" in captured.out       # add
+    assert "Result: 6.0" in captured.out       # subtract
+    assert "Result: 10.0" in captured.out      # multiply
+    assert "Result: 5.0" in captured.out       # divide
+    assert "History:" in captured.out
+    assert "Available commands" in captured.out
+    assert "Goodbye!" in captured.out
