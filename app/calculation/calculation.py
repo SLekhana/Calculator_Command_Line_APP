@@ -15,6 +15,10 @@ class Calculation:
         """Perform the stored calculation and return the result."""
         return self.operation(self.a, self.b)
 
+    def execute(self):
+        """Alias for perform(), for compatibility with tests."""
+        return self.perform()
+
 
 class CalculationFactory:
     """Factory class to create Calculation objects."""
