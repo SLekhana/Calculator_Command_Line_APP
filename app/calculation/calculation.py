@@ -19,6 +19,10 @@ class Calculation:
         """Alias for perform(), for compatibility with tests."""
         return self.perform()
 
+    def __repr__(self):
+        """Readable representation (helps with test coverage)."""
+        return f"Calculation({self.a}, {self.b}, {self.operation.__name__})"
+
 
 class CalculationFactory:
     """Factory class to create Calculation objects."""
