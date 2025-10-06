@@ -63,9 +63,10 @@ def repl():
 
             try:
                 func = operations[operation]
-                # Using CalculationFactory pattern
+                # Use CalculationFactory to create calculation object
                 calc = CalculationFactory.create(a, b, func)
-                # EAFP pattern
+
+                # Execute safely (supporting multiple object types)
                 if hasattr(calc, "perform"):
                     result = calc.perform()
                 elif callable(calc):
@@ -75,3 +76,13 @@ def repl():
 
                 print(f"Result: {result}")
                 history.append(f"{operation}({a}, {b}) = {result}")
+
+            except ZeroDivisionError:
+                print("Error: Division by zero")
+            except TypeError as e:
+                print(f"Error: {e}")
+            except Exception as e:  # pragma: no cover
+                print(f"Error: {e}")
+
+        else:  # pragma: no cover
+            print("Invalid input. Type 'help' for commands.")
