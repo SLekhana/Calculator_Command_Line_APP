@@ -12,28 +12,27 @@ class Calculation:
     operation: callable
 
     def perform(self):
-        """Perform the stored calculation and return the result."""
+        """Perform the calculation and return the result."""
         try:
             return self.operation(self.a, self.b)
         except ZeroDivisionError:
             raise ZeroDivisionError("Cannot divide by zero")
 
     def execute(self):
-        """Alias for perform() for backward compatibility."""
+        """Alias for perform, for backward compatibility."""
         return self.perform()
 
     def __repr__(self):
-        """Readable representation for debugging."""
         op_name = getattr(self.operation, "__name__", str(self.operation))
         return f"Calculation({self.a}, {self.b}, {op_name})"
 
 
 class CalculationFactory:
-    """Factory class to create Calculation objects."""
+    """Factory for creating Calculation instances."""
 
     @staticmethod
     def create(a: float, b: float, operation):
-        """Return a Calculation object for given operands and operation."""
+        """Create and return a Calculation object."""
         op_map = {
             "add": operations.add,
             "subtract": operations.subtract,
@@ -41,7 +40,6 @@ class CalculationFactory:
             "divide": operations.divide,
         }
 
-        # Handle string operation names
         if isinstance(operation, str):
             operation = op_map.get(operation)
 
