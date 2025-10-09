@@ -16,7 +16,7 @@ class Calculation:
         try:
             return self.operation(self.a, self.b)
         except ZeroDivisionError:  # pragma: no cover
-            raise ZeroDivisionError("Cannot divide by zero")
+            raise ZeroDivisionError("Cannot divide by zero")  # pragma: no cover
 
     def execute(self):
         """Alias for perform, for backward compatibility."""
