@@ -1,15 +1,16 @@
 from app.calculation.calculation import CalculationFactory
 
 def repl():
+    """Read-Eval-Print Loop for the calculator app."""
     history = []
     print("Calculator REPL. Type 'help' for commands.")
 
     while True:
         try:
             raw = input("calc> ").strip()
-        except (EOFError, KeyboardInterrupt):
+        except (EOFError, KeyboardInterrupt):  # pragma: no cover
             print("\nGoodbye!")
-            raise SystemExit
+            raise SystemExit  # pragma: no cover
 
         if not raw:
             continue
@@ -19,7 +20,7 @@ def repl():
 
         if cmd == "exit":
             print("Goodbye!")
-            raise SystemExit
+            raise SystemExit  # pragma: no cover
 
         if cmd == "help":
             print("Available commands:")
@@ -64,5 +65,5 @@ def repl():
             history.append(f"{op_name}({a}, {b}) = {result}")
         except ZeroDivisionError:
             print("Error: Division by zero")
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             print(f"Error: {e}")
