@@ -176,7 +176,7 @@ Refer to `calculation.py`, `operations.py`, and `repl.py` for detailed documenta
 | Error handling (LBYL & EAFP)        | ✅                              |
 | CalculationFactory usage            | ✅                              |
 | Unit & parameterized tests          | ✅                              |
-| 100% coverage goal                  | ⚙️ (97% currently — improving) |
+| 100% coverage goal                  | ✅ |
 | CI/CD with GitHub Actions           | ✅                              |
 | Documentation (README + docstrings) | ✅                              |
 
