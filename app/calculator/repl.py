@@ -1,5 +1,6 @@
 from app.calculation.calculation import CalculationFactory
 
+
 def repl():
     """Read-Eval-Print Loop for the calculator app."""
     history = []
