@@ -17,7 +17,7 @@ class Calculation:
             return self.operation(self.a, self.b)
         except ZeroDivisionError:
             # This line only triggers for division by zero, safe to exclude
-            raise ZeroDivisionError("Cannot divide by zero")  # pragma: no cover
+            raise ZeroDivisionError("Cannot divide by zero")
 
     def execute(self):
         """Alias for perform, for backward compatibility."""
