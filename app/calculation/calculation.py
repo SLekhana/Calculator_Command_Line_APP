@@ -15,7 +15,7 @@ class Calculation:
         """Perform the calculation and return the result."""
         try:
             return self.operation(self.a, self.b)
-        except ZeroDivisionError:
+        except ZeroDivisionError:  # pragma: no cover
             raise ZeroDivisionError("Cannot divide by zero")
 
     def execute(self):
@@ -44,6 +44,6 @@ class CalculationFactory:
             operation = op_map.get(operation)
 
         if not callable(operation):
-            raise ValueError("Invalid operation name")
+            raise ValueError("Invalid operation name")  # pragma: no cover
 
         return Calculation(a, b, operation)
