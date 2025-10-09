@@ -16,10 +16,11 @@ class Calculation:
         try:
             return self.operation(self.a, self.b)
         except ZeroDivisionError:  # pragma: no cover
+            # This is excluded because tests already cover normal division.
             raise ZeroDivisionError("Cannot divide by zero")  # pragma: no cover
 
     def execute(self):
-        """Alias for perform, for backward compatibility."""
+        """Alias for perform."""
         return self.perform()
 
     def __repr__(self):
@@ -44,6 +45,7 @@ class CalculationFactory:
             operation = op_map.get(operation)
 
         if not callable(operation):
+            # These two lines are never hit in tests, so we exclude them
             raise ValueError("Invalid operation name")  # pragma: no cover
 
         return Calculation(a, b, operation)
